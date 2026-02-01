@@ -54,11 +54,12 @@ jobs:
               unit_price NUMERIC(10,2) NOT NULL,
               transaction_qty INTEGER NOT NULL
           );"
-          # Import CSV
+          # Import CSV using client-side \copy
           PGPASSWORD=postgres psql -h localhost -U postgres -d coffe_shop_sales_db -c "\
-          COPY sales(transaction_date, unit_price, transaction_qty) \
-          FROM '$(pwd)/coffee_shop_sales.csv' \
+          \copy sales(transaction_date, unit_price, transaction_qty) \
+          FROM 'coffee_shop_sales.csv' \
           DELIMITER ',' CSV HEADER;"
+
 
       # 5️⃣ Run Python script to generate HTML
       - name: Run report generator
