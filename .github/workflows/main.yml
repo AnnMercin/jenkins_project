@@ -1,5 +1,6 @@
 name: Generate Sales Report
 
+# Trigger workflow on push to main
 on:
   push:
     branches:
@@ -25,19 +26,41 @@ jobs:
           --health-retries=5
 
     steps:
-      - name: Checkout repository
+      # 1️⃣ Checkout your repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      # 2️⃣ Setup Python environment
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # 3️⃣ Install Python dependencies
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install psycopg2-binary
 
+      # 4️⃣ Seed Postgres from CSV
+      - name: Seed database from CSV
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          # Create the sales table
+          PGPASSWORD=postgres psql -h localhost -U postgres -d coffe_shop_sales_db -c "
+          CREATE TABLE IF NOT EXISTS sales (
+              id SERIAL PRIMARY KEY,
+              transaction_date DATE NOT NULL,
+              unit_price NUMERIC(10,2) NOT NULL,
+              transaction_qty INTEGER NOT NULL
+          );"
+          # Import CSV
+          PGPASSWORD=postgres psql -h localhost -U postgres -d coffe_shop_sales_db -c "\
+          COPY sales(transaction_date, unit_price, transaction_qty) \
+          FROM '$(pwd)/coffee_shop_sales.csv' \
+          DELIMITER ',' CSV HEADER;"
+
+      # 5️⃣ Run Python script to generate HTML
       - name: Run report generator
         env:
           DB_HOST: localhost
@@ -48,6 +71,7 @@ jobs:
         run: |
           python render_html.py
 
+      # 6️⃣ Upload HTML report as artifact
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         with:
