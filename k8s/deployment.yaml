@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: hello
-        image: yourdockerhubusername/hello-jenkins:latest
+        image: omegaberaka/hello-jenkins:latest
         ports:
         - containerPort: 3000
 
