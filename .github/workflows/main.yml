@@ -2,6 +2,9 @@ name: Run Pipe Script
 
 on:
   workflow_dispatch:  # manual trigger
+  push: 
+   branches: 
+     - main
 
 jobs:
   run_pipe:
@@ -21,3 +24,16 @@ jobs:
       - name: Run pipe.py
         run: |
           echo -e "5\n7" | python pipe.py  # simulate input
+
+      - name: Commit & push changes (only if success)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add .
+            git commit -m "Auto-update from pipe.py"
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi
