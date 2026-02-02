@@ -1,5 +1,5 @@
 name: Run Pipe Script
-
+run-name: Deploy to main
 on:
   workflow_dispatch:  # manual trigger
   push: 
